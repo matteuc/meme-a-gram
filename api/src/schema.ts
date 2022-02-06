@@ -11,6 +11,7 @@ import { getImageUrlFromImageRef } from './utils'
 
 export interface MemeCreateInput {
   imageRef: string
+  imageType: string
   title: string
 }
 
@@ -31,9 +32,11 @@ type Meme {
   title: String
   imageUrl: String!
   imageRef: String
+  imageType: String
 }
 input MemeCreateInput {
-  imageRef: String
+  imageRef: String!
+  imageType: String!
   title: String!
 }
 type Query {
@@ -84,8 +87,11 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       return context.prisma.meme.findMany({
         where,
         take: MEME_PAGE_SIZE,
-        skip: 1, // skip the last item
+        skip: cursor ? 1 : 0, // skip the last item if cursor specified
         cursor,
+        orderBy: {
+          createdAt: "desc"
+        }
       })
     },
   },
@@ -107,7 +113,7 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       args: { data: MemeCreateInput; authorEmail: string },
       context: Context,
     ) => {
-      const permUrl = await getImageUrlFromImageRef(args.data.imageRef)
+      const permUrl = await getImageUrlFromImageRef(args.data.imageRef, args.data.imageType)
 
       if (!permUrl) {
         throw new ErrorWithProps(ERROR_CODES.MEME_REF_INVALID.message, {
@@ -122,6 +128,7 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
           title: args.data.title,
           imageRef: args.data.imageRef,
           imageUrl: permUrl,
+          imageType: args.data.imageType,
           author: {
             connect: { email: args.authorEmail },
           },

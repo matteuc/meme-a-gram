@@ -20,6 +20,7 @@ model Meme {
   title     String
   imageUrl  String
   imageRef  String
+  imageType String
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
 }
