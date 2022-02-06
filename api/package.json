@@ -5,9 +5,10 @@
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/server",
     "dev:prisma": "yarn setup-prisma --watch",
     "setup-prisma": "yarn prisma generate",
-    "setup": "yarn setup-prisma",
+    "setup": "yarn setup-prisma && yarn setup-jwk",
     "setup-db": "yarn prisma db push",
-    "seed-db": "yarn prisma db seed"
+    "seed-db": "yarn prisma db seed",
+    "setup-jwk": "ts-node src/get-jwk.ts"
   },
   "license": "ISC",
   "prettier": {
@@ -19,8 +20,10 @@
     "@graphql-tools/schema": "8.3.1",
     "@prisma/client": "3.8.1",
     "aws-sdk": "^2.1069.0",
+    "axios": "^0.25.0",
     "dotenv": "^16.0.0",
     "fastify": "3.27.1",
+    "fastify-cors": "^6.0.2",
     "graphql": "15.8.0",
     "graphql-scalars": "1.14.1",
     "mercurius": "8.12.0",

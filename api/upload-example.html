@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Example</title>
+</head>
+
+<body>
+    <input type="file" onchange="handleFileInput(event)" />
+    <button onclick="uploadSelectedFile()"> Upload to S3</button>
+
+    <script>
+        let selectedFile = null;
+
+        const handleFileInput = (e) => selectedFile = e.target.files[0];
+
+        const uploadSelectedFile = () => {
+            const file = selectedFile;
+
+            const requestObject = {
+                method: 'POST',
+                body: JSON.stringify({
+                    query: `{ getFileUploadUrl(data: {
+                fileName: "${file.name}",
+                fileType: "${file.type}"
+            })}`
+                }),
+                headers: {
+                    'x-user': '123',
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            fetch('http://127.0.0.1:4000/graphql', requestObject)
+                .then(async res => {
+
+                    const {
+                        data
+                    } = await res.json()
+
+                    console.log({
+                        data
+                    }, "UPLOAD URL")
+
+                    const fileUploadUrl = data?.getFileUploadUrl;
+
+                    if (!fileUploadUrl) {
+                        alert('There was a problem uploading the image. Please try again later.')
+                    }
+
+                    fetch(fileUploadUrl, {
+                        method: 'PUT',
+                        body: file
+                    }).then((res) => {
+                        // DO WHATEVER YOU WANT
+                        const resData = await res.json();
+
+                        console.debug({resData}, "PUT OBJECT RES")
+                    })
+                })
+        }
+    </script>
+</body>
+
+</html>

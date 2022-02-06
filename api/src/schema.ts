@@ -5,9 +5,9 @@ import {
 import { DateTimeResolver } from 'graphql-scalars'
 import mercurius from 'mercurius'
 const { ErrorWithProps } = mercurius
-import { ERROR_CODES, MEME_PAGE_SIZE } from './constants'
-import { Context } from './context'
-import { getImageUrlFromImageRef } from './utils'
+import { BUCKET_FOLDERS, ERROR_CODES, MEME_PAGE_SIZE } from './constants'
+import { Context, CustomContext } from './context'
+import { getImageUrlFromImageRef, getStorageBucketUploadUrl } from './utils'
 
 export interface MemeCreateInput {
   imageRef: string
@@ -18,6 +18,11 @@ export interface MemeCreateInput {
 export interface UserCreateInput {
   email: string
   username: string
+}
+
+export interface FileUploadInput {
+  fileName: string
+  fileType: string
 }
 
 const typeDefs = `
@@ -42,6 +47,7 @@ input MemeCreateInput {
 type Query {
   feed(lastId: Int, searchString: String): [Meme!]!
   memeById(id: Int): Meme
+  getFileUploadUrl(data: FileUploadInput!): String!
 }
 type User {
   email: String
@@ -55,6 +61,10 @@ input UserCreateInput {
   memes: [MemeCreateInput!]
 }
 scalar DateTime
+input FileUploadInput {
+  fileName: String!
+  fileType: String!
+}
 `
 
 const resolvers: IExecutableSchemaDefinition['resolvers'] = {
@@ -90,9 +100,32 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         skip: cursor ? 1 : 0, // skip the last item if cursor specified
         cursor,
         orderBy: {
-          createdAt: "desc"
-        }
+          createdAt: 'desc',
+        },
       })
+    },
+    getFileUploadUrl: async (
+      _,
+      args: { data: FileUploadInput },
+      context: CustomContext,
+    ) => {
+      const userId = context.auth?.user?.id
+
+      if (!userId) {
+        throw new ErrorWithProps(ERROR_CODES.NOT_AUTH.message, {
+          code: ERROR_CODES.NOT_AUTH.code,
+          timestamp: new Date().getTime(),
+        })
+      }
+
+      const putUrl = await getStorageBucketUploadUrl(
+        userId.toString(),
+        args.data.fileName,
+        args.data.fileType,
+        BUCKET_FOLDERS.users,
+      )
+
+      return putUrl.url
     },
   },
   Mutation: {
@@ -113,7 +146,10 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       args: { data: MemeCreateInput; authorEmail: string },
       context: Context,
     ) => {
-      const permUrl = await getImageUrlFromImageRef(args.data.imageRef, args.data.imageType)
+      const permUrl = await getImageUrlFromImageRef(
+        args.data.imageRef,
+        args.data.imageType,
+      )
 
       if (!permUrl) {
         throw new ErrorWithProps(ERROR_CODES.MEME_REF_INVALID.message, {

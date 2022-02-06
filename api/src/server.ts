@@ -4,17 +4,17 @@ import mercuriusAuth from 'mercurius-auth'
 import { schema } from './schema'
 import { context } from './context'
 import crypto from 'crypto'
+import { AuthContext } from './types'
+
 declare module 'mercurius' {
   // TODO - Revise with user type
-  type MercuriusAuthContext = {
-    user?: { name: string; id: number }
-  }
+  type MercuriusAuthContext = AuthContext
 }
-
 const buildServer = async () => {
   const app = fastify()
 
   await app
+    .register(require('fastify-cors'))
     .register(mercurius, {
       schema,
       graphiql: true,
