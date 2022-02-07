@@ -1,4 +1,8 @@
+import jwt from 'jsonwebtoken'
+import jwkToPem from 'jwk-to-pem'
+import jwt_decode from 'jwt-decode'
 import { MAIN_STORAGE_BUCKET } from './services'
+import { AuthContext } from './types'
 
 // Get image URL based off image reference
 export const getImageUrlFromImageRef = async (
@@ -44,5 +48,46 @@ export const getStorageBucketUploadUrl = async (
   return {
     url: getPutUrl,
     key: objectKey,
+  }
+}
+
+export const getUserFromToken = async (
+  token: string,
+): Promise<AuthContext['user'] | null> => {
+  const keys = require('../jwk.json')['keys'] || []
+
+  const decodedHeader = jwt_decode(token, { header: true }) as any
+
+  const matchingKey = keys.find((key: any) => key.kid === decodedHeader.kid)
+
+  if (!matchingKey) {
+    throw new Error('Kid claim is invalid.')
+  }
+  
+  const pem = jwkToPem(matchingKey)
+  
+  // TODO - Layout ground work for decoding JWT
+
+  // const decodedToken = await new Promise((resolve, reject) => {
+  //   jwt.verify(
+  //     token,
+  //     pem,
+  //     { algorithms: ['RS256'] },
+  //     function (err, decodedToken) {
+  //       if (err) {
+  //         reject(err)
+  //         return
+  //       }
+
+  //       resolve(decodedToken)
+  //     },
+  //   )
+  // })
+
+  // console.log({ decodedToken })
+
+  return {
+    name: 'Anonymous',
+    id: 123,
   }
 }

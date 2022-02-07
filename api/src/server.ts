@@ -5,6 +5,7 @@ import { schema } from './schema'
 import { context } from './context'
 import crypto from 'crypto'
 import { AuthContext } from './types'
+import { getUserFromToken } from './utils'
 
 declare module 'mercurius' {
   // TODO - Revise with user type
@@ -25,13 +26,20 @@ const buildServer = async () => {
       },
     })
     .register(mercuriusAuth, {
-      // TODO - Verify user JWT using auth SDK
-      authContext(context) {
-        const userId = context.reply.request.headers['x-user'] || ''
+      async authContext(context) {
+        const authToken = context.reply.request.headers['Authentication'] || context.reply.request.headers['authentication'] || ''
 
-        const user = { id: userId, name: 'Anonymous' }
+        try {
 
-        return { user }
+          const user = await getUserFromToken(
+            Array.isArray(authToken) ? authToken[0] : authToken,
+          )
+
+          return { user }
+        } catch(e) {
+          console.error({e})
+        }
+
       },
       async applyPolicy(policy, _parent, _args, context, info) {
         if (Boolean(context.auth?.user) !== !policy?.public) {
