@@ -1,9 +1,17 @@
+import { ConfigProvider } from "antd";
+import "antd/dist/antd.css";
+
+function AppContent() {
+  return <></>;
+}
 
 function App() {
   return (
-    <div >
-    
-    </div>
+    <>
+      <ConfigProvider>
+        <AppContent />
+      </ConfigProvider>
+    </>
   );
 }
 
