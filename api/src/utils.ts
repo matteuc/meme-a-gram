@@ -1,10 +1,12 @@
-import jwt from 'jsonwebtoken'
+import { CognitoIdentityServiceProvider } from 'aws-sdk'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 import jwkToPem from 'jwk-to-pem'
 import jwt_decode from 'jwt-decode'
-import { MAIN_STORAGE_BUCKET } from './services'
+import { context } from './context'
+import { MAIN_STORAGE_BUCKET, MAIN_USER_POOL } from './services'
 import { AuthContext } from './types'
 
-const JWK = require('../jwk.json');
+const JWK = require('../jwk.json')
 
 // Get image URL based off image reference
 export const getImageUrlFromImageRef = async (
@@ -65,31 +67,57 @@ export const getUserFromToken = async (
   if (!matchingKey) {
     throw new Error('Kid claim is invalid.')
   }
-  
+
   const pem = jwkToPem(matchingKey)
-  
-  // TODO - Layout ground work for decoding JWT
 
-  // const decodedToken = await new Promise((resolve, reject) => {
-  //   jwt.verify(
-  //     token,
-  //     pem,
-  //     { algorithms: ['RS256'] },
-  //     function (err, decodedToken) {
-  //       if (err) {
-  //         reject(err)
-  //         return
-  //       }
+  const decodedToken = (await new Promise((resolve, reject) => {
+    jwt.verify(token, pem, { algorithms: ['RS256'] }, function (err, resToken) {
+      if (err) {
+        reject(err)
+        return
+      }
 
-  //       resolve(decodedToken)
-  //     },
-  //   )
-  // })
+      resolve(resToken as JwtPayload)
+    })
+  })) as JwtPayload
 
-  // console.log({ decodedToken })
+  const now = new Date().getTime() / 1000
 
-  return {
-    name: 'Anonymous',
-    id: 123,
+  const expiryTime = decodedToken.exp || 0
+
+  if (expiryTime < now) {
+    throw new Error('Token has expired.')
   }
+
+  const userData =
+    await new Promise<CognitoIdentityServiceProvider.GetUserResponse>(
+      (resolve, reject) => {
+        MAIN_USER_POOL.api.getUser({ AccessToken: token }, (err, data) => {
+          if (err) {
+            reject(err)
+            return
+          }
+
+          resolve(data)
+        })
+      },
+    )
+
+  const userEmail = userData.UserAttributes.find(
+    (attr) => attr.Name === 'email',
+  )?.Value
+
+  if (!userEmail) {
+    throw new Error('User data is missing the key "email".')
+  }
+
+  const userRes = await context.prisma.user.findUnique({
+    where: { email: userEmail },
+  })
+
+  if (!userRes) {
+    throw new Error('User record was not found.')
+  }
+
+  return userRes
 }

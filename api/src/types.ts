@@ -1,3 +1,5 @@
+import { User } from '@prisma/client'
+
 export interface AuthContext {
-    user?: { name: string; id: number }
+  user?: User
 }

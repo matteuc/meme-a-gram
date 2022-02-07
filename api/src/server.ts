@@ -28,8 +28,7 @@ const buildServer = async () => {
     })
     .register(mercuriusAuth, {
       async authContext(context) {
-        const authToken = context.reply.request.headers['Authentication'] || context.reply.request.headers['authentication'] || ''
-
+        const authToken = context.reply.request.headers['Authorization'] || context.reply.request.headers['authorization'] || ''
         try {
 
           const user = await getUserFromToken(

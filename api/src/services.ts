@@ -16,3 +16,9 @@ export const MAIN_STORAGE_BUCKET = {
   name: CONFIG.aws_bucket_name,
   region: CONFIG.aws_bucket_region,
 }
+
+export const MAIN_USER_POOL = {
+  api: new AWS.CognitoIdentityServiceProvider({
+    region: CONFIG.aws_cognito_pool_region,
+  }),
+}
