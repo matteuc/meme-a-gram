@@ -11,6 +11,8 @@ interface BaseResponse<T> {
 
 interface BaseQuery {
   query: string;
+  variables?: Record<string, any>;
+  operationName?: string;
 }
 
 class BaseFetch {
@@ -36,9 +38,15 @@ class BaseFetch {
     };
   }
 
-  async postQuery<QueryResponse>(query: string): Promise<QueryResponse> {
+  async postQuery<QueryResponse>(
+    query: string,
+    operationName?: string,
+    variables?: Record<string, any>
+  ): Promise<QueryResponse> {
     const baseQuery: BaseQuery = {
       query,
+      variables: variables || {},
+      operationName: operationName || undefined,
     };
 
     const queryRes = await axios.post<BaseResponse<QueryResponse>>(

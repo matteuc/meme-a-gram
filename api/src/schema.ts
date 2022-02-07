@@ -27,7 +27,7 @@ export interface FileUploadInput {
 
 const typeDefs = `
 type Mutation {
-  createMeme(authorEmail: String!, data: MemeCreateInput!): Meme!
+  createMeme(data: MemeCreateInput!): Meme!
   signupUser(data: UserCreateInput!): User!
 }
 type Meme {
@@ -44,10 +44,14 @@ input MemeCreateInput {
   imageType: String!
   title: String!
 }
+type FileUploadUrlConfig {
+  url: String!
+  key: String!
+}
 type Query {
   feed(lastId: Int, searchString: String): [Meme!]!
   memeById(id: Int): Meme
-  getFileUploadUrl(data: FileUploadInput!): String!
+  getFileUploadUrl(data: FileUploadInput!): FileUploadUrlConfig!
 }
 type User {
   email: String
@@ -69,7 +73,7 @@ input FileUploadInput {
 
 const resolvers: IExecutableSchemaDefinition['resolvers'] = {
   Query: {
-    memeById: (_, args: { id: number }, context: Context) => {
+    memeById: (_, args: { id: number }, context: CustomContext) => {
       return context.prisma.meme.findUnique({
         where: { id: args.id || undefined },
       })
@@ -80,7 +84,7 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         searchString: string
         lastId: number
       },
-      context: Context,
+      context: CustomContext,
     ) => {
       const cursor = args.lastId
         ? {
@@ -125,14 +129,17 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         BUCKET_FOLDERS.users,
       )
 
-      return putUrl.url
+      return {
+        url: putUrl.url,
+        key: putUrl.key,
+      }
     },
   },
   Mutation: {
     signupUser: async (
       _,
       args: { data: UserCreateInput },
-      context: Context,
+      context: CustomContext,
     ) => {
       return context.prisma.user.create({
         data: {
@@ -143,9 +150,13 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
     },
     createMeme: async (
       _,
-      args: { data: MemeCreateInput; authorEmail: string },
-      context: Context,
+      args: { data: MemeCreateInput },
+      context: CustomContext,
     ) => {
+      if (!context.auth?.user?.email) {
+        throw new Error('User "email" not found when creating a meme.')
+      }
+
       const permUrl = await getImageUrlFromImageRef(
         args.data.imageRef,
         args.data.imageType,
@@ -166,7 +177,7 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
           imageUrl: permUrl,
           imageType: args.data.imageType,
           author: {
-            connect: { email: args.authorEmail },
+            connect: { email: context.auth.user.email },
           },
         },
       })
@@ -174,7 +185,7 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
   },
   DateTime: DateTimeResolver,
   Meme: {
-    author: (parent, _args, context: Context) => {
+    author: (parent, _args, context: CustomContext) => {
       return context.prisma.meme
         .findUnique({
           where: { id: parent?.id },
@@ -183,7 +194,7 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
     },
   },
   User: {
-    memes: (parent, _args, context: Context) => {
+    memes: (parent, _args, context: CustomContext) => {
       return context.prisma.user
         .findUnique({
           where: { id: parent?.id },

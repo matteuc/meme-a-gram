@@ -28,7 +28,7 @@ export const getImageUrlFromImageRef = async (
     throw err
   }
 
-  const getViewUrl = `https://${MAIN_STORAGE_BUCKET.name}.s3.${MAIN_STORAGE_BUCKET.region}.amazonaws.com/`
+  const getViewUrl = `https://${MAIN_STORAGE_BUCKET.name}.s3.${MAIN_STORAGE_BUCKET.region}.amazonaws.com/${imageRef}`
 
   return getViewUrl
 }
