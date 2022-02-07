@@ -141,6 +141,15 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       args: { data: UserCreateInput },
       context: CustomContext,
     ) => {
+      
+      if(context.auth?.user) {
+        throw new Error('This user already has an account.')
+      }
+
+      if(!context.auth?.userAuthId) {
+        throw new Error('This user\'s authentication information was not found.')
+      }
+
       return context.prisma.user.create({
         data: {
           username: args.data.username,

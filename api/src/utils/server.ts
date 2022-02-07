@@ -6,7 +6,6 @@ import {
 import {
   ApplyPolicyHandler,
   AuthContextHandler,
-  MercuriusAuthPolicy,
 } from 'mercurius-auth'
 import crypto from 'crypto'
 import { context as appContext } from '../context'
@@ -26,7 +25,7 @@ export const preParsingHook: preParsingHookHandler<MercuriusContext> = async (
 ${stdoutLine}
 Stage: START
 Request ID: ${reqId}
-User: ${context.auth?.user}
+Auth: ${context.auth}
 Source: ${source}
 ${stdoutLine}
 `)
@@ -45,7 +44,7 @@ export const onResolutionHook: onResolutionHookHandler<MercuriusContext> = async
 ${stdoutLine}
 Stage: END
 Request ID: ${reqId}
-User: ${JSON.stringify(context.auth?.user)}
+Auth: ${JSON.stringify(context.auth)}
 Result: ${JSON.stringify(execution.data)}
 Errors: ${JSON.stringify(execution.errors)}
 ${stdoutLine}
@@ -66,11 +65,11 @@ export const authContextHandler: AuthContextHandler<MercuriusContext> = async (
     context.reply.request.headers['authorization'] ||
     ''
   try {
-    const user = await getUserFromToken(
+    const authContext = await getUserFromToken(
       Array.isArray(authToken) ? authToken[0] : authToken,
     )
 
-    return { user }
+    return authContext
   } catch (e) {
     console.error({ e })
   }

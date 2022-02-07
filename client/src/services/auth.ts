@@ -120,6 +120,20 @@ class AuthService {
     });
   };
 
+  logout = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const currentUser = this.pool.getCurrentUser();
+
+      
+      if (!currentUser) {
+        reject(new Error("Logout failed. No current user."));
+        return;
+      }
+
+      currentUser.signOut(resolve);
+    });
+  };
+
   currentUser = (): CognitoUser | null => {
     return this.pool.getCurrentUser();
   };
