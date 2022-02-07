@@ -4,6 +4,8 @@ import jwt_decode from 'jwt-decode'
 import { MAIN_STORAGE_BUCKET } from './services'
 import { AuthContext } from './types'
 
+const JWK = require('../jwk.json');
+
 // Get image URL based off image reference
 export const getImageUrlFromImageRef = async (
   imageRef: string,
@@ -54,7 +56,7 @@ export const getStorageBucketUploadUrl = async (
 export const getUserFromToken = async (
   token: string,
 ): Promise<AuthContext['user'] | null> => {
-  const keys = require('../jwk.json')['keys'] || []
+  const keys = JWK['keys'] || []
 
   const decodedHeader = jwt_decode(token, { header: true }) as any
 
