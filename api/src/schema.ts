@@ -4,10 +4,10 @@ import {
 } from '@graphql-tools/schema'
 import { DateTimeResolver } from 'graphql-scalars'
 import mercurius from 'mercurius'
-const { ErrorWithProps } = mercurius
 import { BUCKET_FOLDERS, ERROR_CODES, MEME_PAGE_SIZE } from './constants'
 import { Context, CustomContext } from './context'
 import { getImageUrlFromImageRef, getStorageBucketUploadUrl } from './utils'
+const { ErrorWithProps } = mercurius
 
 export interface MemeCreateInput {
   imageRef: string

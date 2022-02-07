@@ -1,9 +1,9 @@
 import fastify from 'fastify'
 import mercurius from 'mercurius'
 import mercuriusAuth from 'mercurius-auth'
+import crypto from 'crypto'
 import { schema } from './schema'
 import { context } from './context'
-import crypto from 'crypto'
 import { AuthContext } from './types'
 import { getUserFromToken } from './utils'
 
@@ -11,6 +11,7 @@ declare module 'mercurius' {
   // TODO - Revise with user type
   type MercuriusAuthContext = AuthContext
 }
+
 const buildServer = async () => {
   const app = fastify()
 
