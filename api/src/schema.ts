@@ -60,7 +60,6 @@ type User {
   memes: [Meme!]
 }
 input UserCreateInput {
-  email: String!
   username: String!
   memes: [MemeCreateInput!]
 }
@@ -146,14 +145,14 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         throw new Error('This user already has an account.')
       }
 
-      if(!context.auth?.userAuthId) {
+      if(!context.auth?.userEmail) {
         throw new Error('This user\'s authentication information was not found.')
       }
 
       return context.prisma.user.create({
         data: {
           username: args.data.username,
-          email: args.data.email,
+          email: context.auth.userEmail,
         },
       })
     },

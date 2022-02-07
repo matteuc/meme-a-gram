@@ -57,6 +57,13 @@ class BaseFetch {
 
     const res = queryRes.data;
 
+    if (res.errors) {
+      console.error(res.errors);
+      throw new Error(
+        `Query execution failed for ${operationName}`
+      );
+    }
+
     return res.data;
   }
 }

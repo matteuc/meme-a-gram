@@ -82,7 +82,11 @@ export const applyPolicyHandler: ApplyPolicyHandler<MercuriusContext> = async (
   context,
   info,
 ) => {
-  if (Boolean(context.auth?.user) !== !policy?.public) {
+  const needsAuth = !policy?.public
+
+  const isAuth = Boolean(context.auth?.user)
+
+  if (needsAuth && !isAuth) {
     return new Error(`User not authenticated to access ${info.fieldName}`)
   }
 

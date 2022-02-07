@@ -65,6 +65,8 @@ export const getUserFromToken = async (
     if (!userEmail) {
       throw new Error('User data is missing the key "email".')
     }
+
+    authContext.userEmail = userEmail;
   
     if (decodedToken.username) {
       authContext.userAuthId = decodedToken.username as string;
