@@ -7,13 +7,19 @@ import {
 } from "amazon-cognito-identity-js";
 import { appConfig } from "../config";
 
-interface LoginUsingCredentialsResult {
+interface SessionInfo {
   idToken: string;
   refreshToken: string;
   idTokenExpiresAt: number;
 }
 
-interface SignUpResult extends LoginUsingCredentialsResult {}
+interface LoginUsingCredentialsResult extends SessionInfo {
+  idToken: string;
+  refreshToken: string;
+  idTokenExpiresAt: number;
+}
+
+interface SignUpResult extends SessionInfo {}
 
 const COGNITO_USER_POOL_CONFIG = {
   UserPoolId: appConfig.COGNITO_POOL_ID, // Your user pool id here
@@ -80,7 +86,7 @@ class AuthService {
         password,
         attributeList,
         [],
-        function (err, result) {
+        async (err, result) => {
           if (err) {
             reject(err);
             return;
@@ -92,29 +98,18 @@ class AuthService {
           }
           const cognitoUser = result.user;
 
-          cognitoUser.getSession(function (
-            err: Error | null,
-            session: CognitoUserSession
-          ) {
-            if (err) {
-              reject(err);
-              return;
-            }
+          const sessionInfo = await this.getSessionInfo(cognitoUser);
 
-            const signupResult: SignUpResult = {
-              refreshToken: session.getRefreshToken().getToken(),
-              idToken: session.getAccessToken().getJwtToken(),
-              idTokenExpiresAt: session.getAccessToken().getExpiration(),
-            };
-
-            resolve(signupResult);
-          });
+          resolve(sessionInfo);
         }
       );
     });
   };
 
-  confirmAccountUsingCode = async (user: CognitoUser, code: string) => {
+  confirmAccountUsingCode = async (
+    user: CognitoUser,
+    code: string
+  ): Promise<any> => {
     return new Promise((resolve, reject) => {
       user.confirmRegistration(code, true, function (err, result) {
         if (err) {
@@ -125,6 +120,42 @@ class AuthService {
         resolve(result);
       });
     });
+  };
+
+  currentUser = (): CognitoUser | null => {
+    return this.pool.getCurrentUser();
+  };
+
+  getSessionInfo = (user: CognitoUser): Promise<SessionInfo> => {
+    return new Promise((resolve, reject) =>
+      user.getSession(function (
+        err: Error | null,
+        session: CognitoUserSession
+      ) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const signupResult: SignUpResult = {
+          refreshToken: session.getRefreshToken().getToken(),
+          idToken: session.getAccessToken().getJwtToken(),
+          idTokenExpiresAt: session.getAccessToken().getExpiration(),
+        };
+
+        resolve(signupResult);
+      })
+    );
+  };
+
+  getCurrentUserSession = async (): Promise<SessionInfo | null> => {
+    const currUser = this.currentUser();
+
+    if (!currUser) return null;
+
+    const sessionInfo = await this.getSessionInfo(currUser);
+
+    return sessionInfo;
   };
 }
 
