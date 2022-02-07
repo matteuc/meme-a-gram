@@ -68,7 +68,7 @@ class AuthService {
     });
   };
 
-  signUp = async (email: string, password: string): Promise<SignUpResult> => {
+  signUp = async (email: string, password: string): Promise<CognitoUser> => {
     const attributeList: CognitoUserAttribute[] = [];
 
     const dataEmail = {
@@ -98,9 +98,7 @@ class AuthService {
           }
           const cognitoUser = result.user;
 
-          const sessionInfo = await this.getSessionInfo(cognitoUser);
-
-          resolve(sessionInfo);
+          resolve(cognitoUser);
         }
       );
     });
