@@ -2,11 +2,11 @@ import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import jwkToPem from 'jwk-to-pem'
 import jwt_decode from 'jwt-decode'
-import { context } from './context'
-import { MAIN_STORAGE_BUCKET, MAIN_USER_POOL } from './services'
-import { AuthContext } from './types'
+import { context } from '../context'
+import { MAIN_STORAGE_BUCKET, MAIN_USER_POOL } from '../services'
+import { AuthContext } from '../types'
 
-const JWK = require('../jwk.json')
+const JWK = require('../../jwk.json')
 
 // Get image URL based off image reference
 export const getImageUrlFromImageRef = async (

@@ -1,16 +1,15 @@
 import fastify from 'fastify'
 import mercurius from 'mercurius'
 import mercuriusAuth from 'mercurius-auth'
-import crypto from 'crypto'
 import { schema } from './schema'
-import { context } from './context'
-import { AuthContext } from './types'
-import { getUserFromToken } from './utils'
-
-declare module 'mercurius' {
-  // TODO - Revise with user type
-  type MercuriusAuthContext = AuthContext
-}
+import {
+  applyPolicyHandler,
+  authContextHandler,
+  onResolutionHook,
+  preParsingHook,
+  setupRequestContext,
+} from './utils'
+import { AUTH_OBJECT_POLICY, DEPLOYED_TO_PORT } from './constants'
 
 const buildServer = async () => {
   const app = fastify()
@@ -20,85 +19,22 @@ const buildServer = async () => {
     .register(mercurius, {
       schema,
       graphiql: true,
-      context: () => {
-        const requestId = crypto.randomBytes(4).toString('hex')
-
-        return { ...context, requestId }
-      },
+      context: setupRequestContext,
     })
     .register(mercuriusAuth, {
-      async authContext(context) {
-        const authToken = context.reply.request.headers['Authorization'] || context.reply.request.headers['authorization'] || ''
-        try {
-
-          const user = await getUserFromToken(
-            Array.isArray(authToken) ? authToken[0] : authToken,
-          )
-
-          return { user }
-        } catch(e) {
-          console.error({e})
-        }
-
-      },
-      async applyPolicy(policy, _parent, _args, context, info) {
-        if (Boolean(context.auth?.user) !== !policy?.public) {
-          return new Error(`User not authenticated to access ${info.fieldName}`)
-        }
-
-        return true
-      },
+      authContext: authContextHandler,
+      applyPolicy: applyPolicyHandler,
       // Enable External Policy mode
       mode: 'external',
-      policy: {
-        Query: {
-          feed: { public: false },
-          memeById: { public: false },
-        },
-        Mutation: {
-          signupUser: { public: true },
-          createMeme: { public: false },
-        },
-      },
+      policy: AUTH_OBJECT_POLICY,
     })
 
-  app.graphql.addHook('preParsing', async (_schema, source, context) => {
-    const stdoutLine = '-'.repeat(process.stdout.columns)
+  app.graphql.addHook('preParsing', preParsingHook)
 
-    // @ts-ignore
-    const reqId = context.requestId
-
-    console.info(`
-${stdoutLine}
-Stage: START
-Request ID: ${reqId}
-User: ${context.auth?.user}
-Source: ${source}
-${stdoutLine}
-`)
-  })
-
-  app.graphql.addHook('onResolution', async (execution, context) => {
-    const stdoutLine = '-'.repeat(process.stdout.columns)
-
-    // @ts-ignore
-    const reqId = context.requestId
-
-    console.info(`
-${stdoutLine}
-Stage: END
-Request ID: ${reqId}
-User: ${JSON.stringify(context.auth?.user)}
-Result: ${JSON.stringify(execution.data)}
-Errors: ${JSON.stringify(execution.errors)}
-${stdoutLine}
-`)
-  })
+  app.graphql.addHook('onResolution', onResolutionHook)
 
   return app
 }
-
-const DEPLOYED_TO_PORT = process.env.PORT || 4000
 
 buildServer().then((app) =>
   app.listen(DEPLOYED_TO_PORT, (err) => {
