@@ -11,11 +11,11 @@ export const ERROR_CODES = {
   NOT_AUTH: {
     message: 'User not authenticated.',
     code: 'NOT_AUTH',
-  }
+  },
 }
 
 export const BUCKET_FOLDERS = {
-  users: 'users'
+  users: 'users',
 }
 
 export const CONFIG = {
@@ -25,15 +25,16 @@ export const CONFIG = {
   aws_bucket_name: process.env.S3_BUCKET_NAME,
   aws_bucket_region: process.env.S3_BUCKET_REGION,
   aws_cognito_pool_region: process.env.COGNITO_USER_POOL_REGION,
-  aws_cognito_pool_id: process.env.COGNITO_USER_POOL_ID
+  aws_cognito_pool_id: process.env.COGNITO_USER_POOL_ID,
 }
 
 export const DEPLOYED_TO_PORT = CONFIG.server_port || 4000
 
 export const AUTH_OBJECT_POLICY: MercuriusAuthPolicy = {
   Query: {
-    feed: { public: false },
-    memeById: { public: false },
+    feed: { public: true },
+    memeById: { public: true },
+    getFileUploadUrl: { public: false },
   },
   Mutation: {
     signupUser: { public: true },

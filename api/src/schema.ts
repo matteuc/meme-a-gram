@@ -5,7 +5,7 @@ import {
 import { DateTimeResolver } from 'graphql-scalars'
 import mercurius from 'mercurius'
 import { BUCKET_FOLDERS, ERROR_CODES, MEME_PAGE_SIZE } from './constants'
-import { Context, CustomContext } from './context'
+import { CustomContext } from './context'
 import { getImageUrlFromImageRef, getStorageBucketUploadUrl } from './utils'
 const { ErrorWithProps } = mercurius
 
