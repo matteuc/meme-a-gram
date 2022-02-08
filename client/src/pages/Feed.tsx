@@ -1,7 +1,9 @@
 import { Col, Row } from "antd";
-import { useSelector } from "react-redux";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 import MemeCard from "../components/MemeCard";
+import { AppThunks } from "../store";
 import { getFeed } from "../store/meme/selectors";
 
 export default function Feed() {
@@ -9,13 +11,22 @@ export default function Feed() {
 
   const memes = useSelector(getFeed);
 
+  const dispatch = useDispatch();
+
+  const queryFeed = AppThunks.memes.queryFeed(dispatch);
+
+  const [loadingFeed, setLoadingFeed] = React.useState(true);
+
   const viewMemeById = (id: number) => {
     navigate(`/meme/${id}`);
   };
 
   const MainContent = () => {
-    if (!memes.length) {
-      return <p>No memes available!</p>;
+    const noMemesAvailable = !memes.length;
+    if (loadingFeed && noMemesAvailable) {
+      return <p>Loading memes</p>; // Upgrade
+    } else if (!loadingFeed && noMemesAvailable) {
+      return <p>No memes available!</p>; // Upgrade
     } else {
       return (
         <Row>
@@ -28,6 +39,18 @@ export default function Feed() {
       );
     }
   };
+
+  React.useEffect(() => {
+    setLoadingFeed(true);
+
+    queryFeed()
+      .catch((e) => {
+        console.debug("Error fetching feed", { e }); // UPGRADE - show snackbar
+      })
+      .finally(() => {
+        setLoadingFeed(false);
+      });
+  }, []);
 
   return (
     <div>
