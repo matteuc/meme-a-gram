@@ -1,9 +1,11 @@
-import { Avatar, Image, Modal } from "antd";
+import { Avatar, Button, Image, Modal } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import React from "react";
 import Text from "antd/lib/typography/Text";
 import { useDispatch, useSelector } from "react-redux";
 import ReactTimeAgo from "react-timeago";
+import { saveAs } from "file-saver";
 import { getMeme } from "../store/meme/selectors";
 import { AppThunks, RootState } from "../store";
 import { getUser } from "../store/user/selectors";
@@ -62,16 +64,33 @@ export default function MemePage() {
     return <Text type='secondary'>{children}</Text>;
   };
 
+  const downloadImage = () => {
+    if (!meme?.imageUrl) return;
+
+    const splitTerms = meme.imageUrl.split(".");
+
+    const fileExtension = splitTerms[splitTerms.length - 1] || "";
+
+    const newFileName = `meme_${(Date.now() / 1000).toFixed(
+      0
+    )}.${fileExtension}`;
+
+    // UPGRADE - Broken, opening file to download in new tab
+    saveAs(meme.imageUrl, newFileName);
+  };
+
   const MainContent = () => {
     if (meme) {
       return (
         <>
-          <p>
-            <Avatar size='small'>{username[0]}</Avatar>
-            <Text strong style={memePageStylesheet.username}>
-              {username}
-            </Text>
-          </p>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <p>
+              <Avatar size='small'>{username[0]}</Avatar>
+              <Text strong style={memePageStylesheet.username}>
+                {username}
+              </Text>
+            </p>
+          </div>
           <Image
             src={meme.imageUrl}
             wrapperStyle={memePageStylesheet.section}
@@ -81,14 +100,23 @@ export default function MemePage() {
           </div>
           <div style={memePageStylesheet.section}>
             {timestamp ? (
-              <ReactTimeAgo
-                date={timestamp}
-                component={TimestampText}
-              />
+              <ReactTimeAgo date={timestamp} component={TimestampText} />
             ) : (
               <></>
             )}
           </div>
+          {meme.imageUrl ? (
+            <Button
+              type='link'
+              shape='circle'
+              icon={<DownloadOutlined />}
+              onClick={downloadImage}
+            >
+              Download
+            </Button>
+          ) : (
+            <></>
+          )}
         </>
       );
     }
