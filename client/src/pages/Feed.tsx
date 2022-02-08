@@ -68,8 +68,8 @@ export default function Feed() {
         <Button
           style={{
             position: "fixed",
-            bottom: 20,
-            right: 20,
+            bottom: 30,
+            right: 50,
             width: buttonSize,
             height: buttonSize,
           }}
