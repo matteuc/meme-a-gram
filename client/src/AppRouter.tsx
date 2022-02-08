@@ -49,7 +49,7 @@ function AppRouter() {
 }
 
 function NavBar() {
-  const { user } = useAuthProvider();
+  const { user, logout } = useAuthProvider();
 
   const username: string | undefined = user?.username;
 
@@ -61,10 +61,6 @@ function NavBar() {
     () => navigate("/login"),
     [navigate]
   );
-
-  const logout = React.useCallback(() => {
-    // TODO - logout
-  }, []);
 
   const LoginButton = React.useCallback(
     () => (

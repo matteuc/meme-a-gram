@@ -2,8 +2,8 @@ import { baseFetch } from "./baseFetch";
 
 interface GetFileUploadUrlResponse {
   getFileUploadUrl: {
-    url: string,
-    key: string
+    url: string;
+    key: string;
   };
 }
 
@@ -104,4 +104,27 @@ export const getMeme = async (memeId: number) => {
   );
 
   return memeById;
+};
+
+interface GetCurrentUserResponse {
+  getCurrentUser: {
+    id: number;
+    username: string;
+    email: string;
+  };
+}
+
+export const getCurrentUser = async () => {
+  const { getCurrentUser } = await baseFetch.postQuery<GetCurrentUserResponse>(
+    `query GET_CURR_USER() {
+        getCurrentUser {
+            id
+            email
+            username
+        }
+    }`,
+    "GET_CURR_USER"
+  );
+
+  return getCurrentUser;
 };

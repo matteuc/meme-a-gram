@@ -52,6 +52,7 @@ type Query {
   feed(lastId: Int, searchString: String): [Meme!]!
   memeById(id: Int): Meme
   getFileUploadUrl(data: FileUploadInput!): FileUploadUrlConfig!
+  getCurrentUser(): User!
 }
 type User {
   email: String
@@ -133,6 +134,22 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         key: putUrl.key,
       }
     },
+    getCurrentUser: async (
+      _,
+      _args,
+      context: CustomContext,
+    ) => {
+      const currUser = context.auth?.user
+
+      if (!currUser) {
+        throw new ErrorWithProps(ERROR_CODES.NOT_AUTH.message, {
+          code: ERROR_CODES.NOT_AUTH.code,
+          timestamp: new Date().getTime(),
+        })
+      }
+
+      return currUser
+    } 
   },
   Mutation: {
     signupUser: async (

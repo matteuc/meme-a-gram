@@ -5,6 +5,7 @@ import Paragraph from "antd/lib/typography/Paragraph";
 import Text from "antd/lib/typography/Paragraph";
 import React from "react";
 import { useQuery } from "../utils";
+import { useAuthProvider } from "../context/auth";
 
 const { TabPane } = Tabs;
 
@@ -58,15 +59,41 @@ export default function LoginPage() {
 }
 
 function Login() {
-  const errorMessage = "Account login failed!"; //TODO
+  const { login } = useAuthProvider();
 
-  const onFinish = (values: any) => {
-    console.log("Success:", values);
+  const [form] = Form.useForm();
+
+  const [loggingIn, setLoggingIn] = React.useState(false);
+
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const onFinish = async (values: any) => {
+    if (!values.email || !values.password) {
+      console.debug("Email and password values not found.");
+      return;
+    }
+
+    setLoggingIn(true);
+
+    try {
+      await login(values.email, values.password);
+      
+      setErrorMessage("");
+    } catch (e) {
+      console.error("Error logging in:", e);
+
+      setErrorMessage("Account login failed!");
+      
+      form.resetFields(["password"]);
+    } finally {
+      setLoggingIn(false);
+    }
   };
 
   return (
     <>
       <Form
+        form={form}
         name='basic'
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 18 }}
@@ -96,7 +123,7 @@ function Login() {
             },
           ]}
         >
-          <Input />
+          <Input disabled={loggingIn} />
         </Form.Item>
 
         <Form.Item
@@ -117,14 +144,14 @@ function Login() {
             },
           ]}
         >
-          <Input.Password />
+          <Input.Password disabled={loggingIn} />
         </Form.Item>
 
         <Form.Item
           wrapperCol={{ offset: 20, span: 4 }}
           style={{ marginTop: "15px", alignItems: "flex-end" }}
         >
-          <Button type='primary' htmlType='submit'>
+          <Button type='primary' htmlType='submit' loading={loggingIn}>
             Submit
           </Button>
         </Form.Item>

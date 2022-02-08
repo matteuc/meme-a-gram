@@ -35,6 +35,7 @@ export const AUTH_OBJECT_POLICY: MercuriusAuthPolicy = {
     feed: { public: true },
     memeById: { public: true },
     getFileUploadUrl: { public: false },
+    getCurrentUser: { public: false }
   },
   Mutation: {
     signupUser: { public: true },
