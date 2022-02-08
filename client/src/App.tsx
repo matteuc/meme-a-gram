@@ -1,8 +1,16 @@
 import { ConfigProvider } from "antd";
 import "antd/dist/antd.css";
+import { store } from "./store";
+import { Provider } from "react-redux";
 
 function AppContent() {
-  return <></>;
+  return (
+    <>
+      <Provider store={store}>
+        
+      </Provider>
+    </>
+  );
 }
 
 function App() {
