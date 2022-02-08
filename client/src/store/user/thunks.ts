@@ -5,7 +5,7 @@ import { ApiDepot } from "../../services";
 const createUser =
   (dispatch: AppDispatch) =>
   async (
-    params: Parameters<typeof ApiDepot.mutations.createUser>
+    ...params: Parameters<typeof ApiDepot.mutations.createUser>
   ): Promise<User> => {
     const newlyCreatedUser = await ApiDepot.mutations.createUser(...params);
 

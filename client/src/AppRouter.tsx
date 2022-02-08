@@ -5,12 +5,15 @@ import {
   Routes,
   Route,
   useNavigate,
+  Navigate,
 } from "react-router-dom";
 import React from "react";
 import MemePage from "./pages/MemePage";
 import Feed from "./pages/Feed";
 import Login from "./pages/LoginPage";
 import { APP_TITLE } from "./config";
+import CreateMemePage from "./pages/CreateMemePage";
+import { useAuthProvider } from "./context/auth";
 
 const navStylesheet = {
   pageHeader: {
@@ -19,14 +22,26 @@ const navStylesheet = {
 };
 
 function AppRouter() {
+  const { user } = useAuthProvider();
+
+  const isAuth = Boolean(user);
+
   return (
     <BrowserRouter>
       <NavBar />
       <Routes>
         <Route path='/' element={<Feed />}>
+          <Route
+            path='login'
+            element={isAuth ? <Navigate replace to='/' /> : <Login />}
+          />
+          <Route
+            path='create'
+            element={
+              !isAuth ? <Navigate replace to='/login' /> : <CreateMemePage />
+            }
+          />
           <Route path='meme/:memeId' element={<MemePage />} />
-          <Route path='login' element={<Login />} />
-          {/* TODO - Add create meme screen */}
         </Route>
       </Routes>
     </BrowserRouter>
@@ -34,9 +49,11 @@ function AppRouter() {
 }
 
 function NavBar() {
-  const username: string | undefined = "mattiuc"; // TODO
+  const { user } = useAuthProvider();
 
-  const isAuth = false; // TODO
+  const username: string | undefined = user?.username;
+
+  const isAuth = Boolean(user);
 
   const navigate = useNavigate();
 

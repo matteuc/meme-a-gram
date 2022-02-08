@@ -5,7 +5,7 @@ import { upsertUser, upsertUsers } from "../user";
 
 const queryMeme =
   (dispatch: AppDispatch) =>
-  async ([memeId]: Parameters<
+  async (...[memeId]: Parameters<
     typeof ApiDepot.queries.getMeme
   >): Promise<Meme> => {
     const getMemeResult = await ApiDepot.queries.getMeme(memeId);
@@ -32,7 +32,7 @@ const queryMeme =
 const queryFeed =
   (dispatch: AppDispatch) =>
   async (
-    params: Parameters<typeof ApiDepot.queries.getFeed>
+    ...params: Parameters<typeof ApiDepot.queries.getFeed>
   ): Promise<Meme[]> => {
     const getFeedResult = await ApiDepot.queries.getFeed(...params);
 
@@ -66,7 +66,7 @@ const queryFeed =
 const createMeme =
   async (dispatch: AppDispatch) =>
   async (
-    params: Parameters<typeof ApiDepot.mutations.createMeme>
+    ...params: Parameters<typeof ApiDepot.mutations.createMeme>
   ): Promise<Meme> => {
     const createMemeResult = await ApiDepot.mutations.createMeme(...params);
 

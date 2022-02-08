@@ -1,16 +1,12 @@
-import { Avatar, Button, Card, Col, Image, Modal, PageHeader, Row } from "antd";
-import { LoginOutlined, LogoutOutlined } from "@ant-design/icons";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  useParams,
-  Link,
-  Outlet,
-  useNavigate,
-} from "react-router-dom";
+import { Avatar, Image, Modal } from "antd";
+import { useParams, useNavigate } from "react-router-dom";
 import React from "react";
 import Text from "antd/lib/typography/Text";
+import { useDispatch, useSelector } from "react-redux";
+import ReactTimeAgo from "react-timeago";
+import { getMeme } from "../store/meme/selectors";
+import { AppThunks, RootState } from "../store";
+import { getUser } from "../store/user/selectors";
 
 const memePageStylesheet = {
   section: {
@@ -24,48 +20,89 @@ const memePageStylesheet = {
 export default function MemePage() {
   const params = useParams<{ memeId: string }>();
 
-  const thisMemeId = params?.memeId;
+  const dispatch = useDispatch();
 
-  console.log("FETCH", thisMemeId);
+  const getMemeById = AppThunks.memes.queryMeme(dispatch);
 
-  const meme: Meme = {
-    id: 1,
-    title: "Meme Title",
-    createdAt: 0,
-    imageUrl:
-      "https://ichef.bbci.co.uk/news/976/cpsprodpb/F1F2/production/_118283916_b19c5a1f-162b-410b-8169-f58f0d153752.jpg",
-  };
+  const thisMemeId = params?.memeId ? parseInt(params.memeId) : -1;
 
-  const user: User = {
-    username: "matteuc",
-    id: 1,
-  };
+  const meme = useSelector((state: RootState) => getMeme(state, thisMemeId));
+
+  const user = useSelector((state: RootState) =>
+    getUser(state, meme?.authorId || -1)
+  );
+
+  const [loadingMeme, setLoadingMeme] = React.useState(!Boolean(meme));
+
+  React.useEffect(() => {
+    if (meme) return;
+
+    setLoadingMeme(true);
+
+    getMemeById(thisMemeId)
+      .catch((e) => {
+        console.debug("Error fetching meme by ID", e);
+      })
+      .finally(() => {
+        setLoadingMeme(false);
+      });
+  }, [meme, thisMemeId]);
 
   const navigate = useNavigate();
 
-  const onCancel = React.useCallback(() => {
+  const onModalCancel = React.useCallback(() => {
     navigate("/");
   }, [navigate]);
 
-  const username = user.username || "Anon";
+  const username = user?.username || "Anonymous";
 
-  const timestampText = "Dec 10";
+  const timestamp = meme ? new Date(meme.createdAt) : null;
+
+  const TimestampText: React.FC = ({ children }) => {
+    return <Text type='secondary'>{children}</Text>;
+  };
+
+  const MainContent = () => {
+    if (meme) {
+      return (
+        <>
+          <p>
+            <Avatar size='small'>{username[0]}</Avatar>
+            <Text strong style={memePageStylesheet.username}>
+              {username}
+            </Text>
+          </p>
+          <Image
+            src={meme.imageUrl}
+            wrapperStyle={memePageStylesheet.section}
+          />
+          <div style={memePageStylesheet.section}>
+            <Text>{meme.title || ""}</Text>
+          </div>
+          <div style={memePageStylesheet.section}>
+            {timestamp ? (
+              <ReactTimeAgo
+                date={timestamp}
+                component={TimestampText}
+              />
+            ) : (
+              <></>
+            )}
+          </div>
+        </>
+      );
+    }
+
+    if (loadingMeme) {
+      return <p>Loading</p>; // UPGRADE
+    }
+
+    return <p>No meme found!</p>; // UPGRADE
+  };
 
   return (
-    <Modal visible={true} onCancel={onCancel} footer={null}>
-      <p>
-        <Avatar size='small'>{username[0]}</Avatar>
-        <Text strong style={memePageStylesheet.username}>
-          {username}
-        </Text>
-      </p>
-      <Image src={meme.imageUrl} wrapperStyle={memePageStylesheet.section} />
-      <div style={memePageStylesheet.section}>
-        <Text>{meme.title || ""}</Text>
-      </div>
-      <div style={memePageStylesheet.section}>
-        <Text type='secondary'>{timestampText}</Text>
-      </div>
+    <Modal visible={true} onCancel={onModalCancel} footer={null}>
+      <MainContent />
     </Modal>
   );
 }

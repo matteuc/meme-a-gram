@@ -1,10 +1,19 @@
 import * as React from "react";
-type AuthContextData = {};
+type AuthContextData = {
+  user: User | null
+};
 
-const AuthContext = React.createContext<AuthContextData>({});
+const AuthContext = React.createContext<AuthContextData>({
+  user: null
+});
 
 const AuthProvider: React.FC = ({ children }) => {
-  return <AuthContext.Provider value={{}}>{children}</AuthContext.Provider>;
+
+  const [user, setUser] = React.useState<AuthContextData['user']>(null);
+
+  return <AuthContext.Provider value={{
+    user
+  }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuthProvider = () => {
