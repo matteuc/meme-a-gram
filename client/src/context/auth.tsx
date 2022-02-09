@@ -1,22 +1,33 @@
 import * as React from "react";
+import { useDispatch } from "react-redux";
 import { authService } from "../services";
-import { getCurrentUser } from "../services/api/queries";
+import { AppThunks } from "../store";
 type AuthContextData = {
   user: User | null;
   logout: () => Promise<void>;
   login: (
     ...params: Parameters<typeof authService.loginUsingCredentials>
   ) => Promise<void>;
+  signUp: (
+    ...params: Parameters<typeof authService.signUp>
+  ) => Promise<(code: string, name: string) => Promise<any>>;
 };
 
 const AuthContext = React.createContext<AuthContextData>({
   user: null,
   logout: async () => {},
   login: async () => {},
+  signUp: async () => async () => {},
 });
 
 const AuthProvider: React.FC = ({ children }) => {
   const [user, setUser] = React.useState<AuthContextData["user"]>(null);
+
+  const dispatch = useDispatch();
+
+  const createUser = AppThunks.users.createUser(dispatch);
+
+  const getCurrentUser = AppThunks.users.getCurrentUser(dispatch);
 
   const logout: AuthContextData["logout"] = async () => {
     setUser(null);
@@ -35,11 +46,27 @@ const AuthProvider: React.FC = ({ children }) => {
     await retrieveUser();
   };
 
+  const signUp: AuthContextData["signUp"] = async (...params) => {
+    const cogUser = await authService.signUp(...params);
+
+    const confirmRegistration = async (code: string, username: string) => {
+      await authService.confirmAccountUsingCode(cogUser, code);
+
+      await authService.loginUsingCredentials(...params)
+
+      const newUser = await createUser({ username });
+
+      setUser(newUser);
+    };
+
+    return confirmRegistration;
+  };
+
   React.useEffect(() => {
     try {
       if (!user) retrieveUser();
     } catch {
-      console.debug('User not currently authenticated - Updating auth state.')
+      console.debug("User not currently authenticated - Ignoring.");
     }
   }, []);
 
@@ -49,6 +76,7 @@ const AuthProvider: React.FC = ({ children }) => {
         user,
         logout,
         login,
+        signUp,
       }}
     >
       {children}

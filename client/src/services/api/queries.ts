@@ -116,7 +116,7 @@ interface GetCurrentUserResponse {
 
 export const getCurrentUser = async () => {
   const { getCurrentUser } = await baseFetch.postQuery<GetCurrentUserResponse>(
-    `query GET_CURR_USER() {
+    `query GET_CURR_USER {
         getCurrentUser {
             id
             email

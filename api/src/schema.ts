@@ -52,7 +52,7 @@ type Query {
   feed(lastId: Int, searchString: String): [Meme!]!
   memeById(id: Int): Meme
   getFileUploadUrl(data: FileUploadInput!): FileUploadUrlConfig!
-  getCurrentUser(): User!
+  getCurrentUser: User!
 }
 type User {
   email: String

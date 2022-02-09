@@ -19,4 +19,17 @@ const createUser =
     return user;
   };
 
-export { createUser };
+const getCurrentUser = (dispatch: AppDispatch) => async (): Promise<User> => {
+  const currUser = await ApiDepot.queries.getCurrentUser();
+
+  const user: User = {
+    id: currUser.id,
+    username: currUser.username,
+  };
+
+  dispatch(upsertUser(user));
+
+  return user;
+};
+
+export { createUser, getCurrentUser };

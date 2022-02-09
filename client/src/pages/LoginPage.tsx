@@ -77,13 +77,13 @@ function Login() {
 
     try {
       await login(values.email, values.password);
-      
+
       setErrorMessage("");
     } catch (e) {
       console.error("Error logging in:", e);
 
       setErrorMessage("Account login failed!");
-      
+
       form.resetFields(["password"]);
     } finally {
       setLoggingIn(false);
@@ -164,31 +164,113 @@ function Login() {
 }
 
 function Signup() {
-  const onInfoFinish = (values: any) => {
-    // TODO
-    console.log("Success Info:", values);
+  const [infoForm] = Form.useForm<{
+    email: string;
+    password: string;
+    passwordConfirmation: string;
+    username: string;
+  }>();
+
+  const [codeForm] = Form.useForm<{
+    confirmationCode: string;
+  }>();
+
+  const [confirmRegistrationHandler, setConfirmRegistrationHandler] =
+    React.useState<(code: string, name: string) => Promise<void>>();
+
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const { signUp } = useAuthProvider();
+
+  const [actionsLoading, setActionsLoading] = React.useState({
+    signup: false,
+    codeConfirmation: false,
+  });
+
+  const onInfoFinish = async (values: any) => {
+    if (!values.email || !values.password) {
+      console.debug("Email and password values not found.");
+      return;
+    }
+
+    setActionsLoading((oldLoading) => ({
+      ...oldLoading,
+      signup: true,
+    }));
+
+    try {
+      const confirmRegistration = await signUp(values.email, values.password);
+
+      setConfirmRegistrationHandler(() => confirmRegistration);
+
+      setErrorMessage("");
+    } catch (e) {
+      console.error("Error when signing up:", e);
+
+      setErrorMessage("An error occurred when signing up.");
+    } finally {
+      setActionsLoading((oldLoading) => ({
+        ...oldLoading,
+        signup: false,
+      }));
+    }
   };
 
-  const onConfirmationFinish = (values: any) => {
-    // TODO
-    console.log("Success Confirmation:", values);
+  const onConfirmationFinish = async (values: any) => {
+    if (!values.confirmationCode) {
+      console.debug("Confirmation code value not found.");
+      return;
+    }
+
+    if (!confirmRegistrationHandler) {
+      console.debug("Confirmation registration handler not available.");
+      return;
+    }
+
+    const userName = infoForm.getFieldValue("username");
+
+    if (!userName) {
+      console.debug("Username value not found.");
+      return;
+    }
+
+    setActionsLoading((oldLoading) => ({
+      ...oldLoading,
+      codeConfirmation: true,
+    }));
+
+    try {
+      await confirmRegistrationHandler(values.confirmationCode, userName);
+
+      setConfirmRegistrationHandler(undefined);
+
+      setErrorMessage("");
+    } catch (e) {
+      console.error("Error when confirming registration:", e);
+
+      setErrorMessage("An error occurred when confirming the registration.");
+    } finally {
+      setActionsLoading((oldLoading) => ({
+        ...oldLoading,
+        codeConfirmation: false,
+      }));
+    }
   };
 
-  const showCodeConfirmation = true; // TODO
-
-  const errorMessage = "Account creation failed!"; //TODO
+  const showCodeConfirmation = Boolean(confirmRegistrationHandler);
 
   function MainContent() {
-    const enteredEmail = "test@email.com"; //TODO
-
     if (showCodeConfirmation) {
       return (
         <>
           <Paragraph style={{ margin: "15px 0" }}>
             Please enter the confirmation code sent to{" "}
-            <span style={{ fontWeight: "bold" }}>{enteredEmail}</span>
+            <span style={{ fontWeight: "bold" }}>
+              {infoForm.getFieldValue("email")}
+            </span>
           </Paragraph>
           <Form
+            form={codeForm}
             name='basic'
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 20 }}
@@ -208,25 +290,22 @@ function Signup() {
                       );
                     }
 
-                    if (codeEntered !== "123") {
-                      // TODO
-                      return Promise.reject(
-                        new Error("Please enter a valid confirmation code!")
-                      );
-                    }
-
                     return Promise.resolve();
                   },
                 },
               ]}
             >
-              <Input />
+              <Input disabled={actionsLoading.codeConfirmation} />
             </Form.Item>
             <Form.Item
               wrapperCol={{ offset: 20, span: 4 }}
               style={{ marginTop: "15px", alignItems: "flex-end" }}
             >
-              <Button type='primary' htmlType='submit'>
+              <Button
+                type='primary'
+                htmlType='submit'
+                loading={actionsLoading.codeConfirmation}
+              >
                 Submit
               </Button>
             </Form.Item>
@@ -240,6 +319,7 @@ function Signup() {
 
     return (
       <Form
+        form={infoForm}
         name='basic'
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 18 }}
@@ -269,7 +349,7 @@ function Signup() {
             },
           ]}
         >
-          <Input />
+          <Input disabled={actionsLoading.signup} />
         </Form.Item>
 
         <Form.Item
@@ -297,7 +377,7 @@ function Signup() {
             },
           ]}
         >
-          <Input />
+          <Input disabled={actionsLoading.signup} />
         </Form.Item>
 
         <Form.Item
@@ -325,7 +405,7 @@ function Signup() {
             },
           ]}
         >
-          <Input.Password />
+          <Input.Password disabled={actionsLoading.signup} />
         </Form.Item>
 
         <Form.Item
@@ -345,14 +425,18 @@ function Signup() {
             }),
           ]}
         >
-          <Input.Password />
+          <Input.Password disabled={actionsLoading.codeConfirmation} />
         </Form.Item>
 
         <Form.Item
           wrapperCol={{ offset: 20, span: 4 }}
           style={{ marginTop: "15px", alignItems: "flex-end" }}
         >
-          <Button type='primary' htmlType='submit'>
+          <Button
+            type='primary'
+            htmlType='submit'
+            loading={actionsLoading.signup}
+          >
             Submit
           </Button>
         </Form.Item>
