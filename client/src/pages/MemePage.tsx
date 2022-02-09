@@ -1,4 +1,4 @@
-import { Avatar, Button, Image, Modal } from "antd";
+import { Avatar, Button, Image, message, Modal } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import React from "react";
@@ -44,6 +44,7 @@ export default function MemePage() {
     getMemeById(thisMemeId)
       .catch((e) => {
         console.debug("Error fetching meme by ID", e);
+        message.error({content: 'A problem occurred when fetching this meme.', duration: 5})
       })
       .finally(() => {
         setLoadingMeme(false);

@@ -1,14 +1,17 @@
-import { Button, Col, Row, Tooltip } from "antd";
+import { Button, Col, Empty, message, Row, Space, Spin, Tooltip } from "antd";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, SyncOutlined } from "@ant-design/icons";
 
 import MemeCard from "../components/MemeCard";
 import { AppThunks } from "../store";
 import { getFeed } from "../store/meme/selectors";
 
 const MemoMemeCard = React.memo(MemeCard);
+
+const defaultEmptyImage =
+  "https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -25,6 +28,10 @@ export default function Feed() {
     navigate(`/meme/${id}`);
   };
 
+  const openCreateModal = () => {
+    navigate("/create");
+  };
+
   const MainContent = () => {
     const sortedMemes = React.useMemo(
       () => memes.sort((a, b) => b.createdAt - a.createdAt),
@@ -32,10 +39,46 @@ export default function Feed() {
     );
 
     const noMemesAvailable = !memes.length;
-    if (loadingFeed && noMemesAvailable) {
-      return <p>Loading memes</p>; // Upgrade
+
+    if (loadingFeed && !noMemesAvailable) {
+      return (
+        <div
+          style={{
+            height: "60vh",
+            maxHeight: "1000px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Space size='middle'>
+            <SyncOutlined style={{ fontSize: 60, color: "#1890ff" }} spin />
+          </Space>
+        </div>
+      );
     } else if (!loadingFeed && noMemesAvailable) {
-      return <p>No memes available!</p>; // Upgrade
+      return (
+        <div
+          style={{
+            height: "60vh",
+            maxHeight: "1000px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Empty
+            style={{ alignSelf: "center" }}
+            image={defaultEmptyImage}
+            imageStyle={{
+              height: 150,
+            }}
+            description={<span>No memes yet!</span>}
+          >
+            <Button type='primary' onClick={openCreateModal}>
+              Create Now
+            </Button>
+          </Empty>
+        </div>
+      );
     } else {
       return (
         <Row>
@@ -54,7 +97,12 @@ export default function Feed() {
 
     queryFeed()
       .catch((e) => {
-        console.debug("Error fetching feed", { e }); // UPGRADE - show snackbar
+        console.debug("Error fetching feed", { e });
+        message.error({
+          content:
+            "A problem occurred when fetching the feed. Please try again later!",
+          duration: 5,
+        });
       })
       .finally(() => {
         setLoadingFeed(false);

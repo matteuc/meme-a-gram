@@ -6,6 +6,11 @@ import Text from "antd/lib/typography/Paragraph";
 import React from "react";
 import { useQuery } from "../utils";
 import { useAuthProvider } from "../context/auth";
+import {
+  EMAIL_REQ_REGEX,
+  MIN_USERNAME_LENGTH,
+  PASSWORD_REQ_REGEX,
+} from "../config";
 
 const { TabPane } = Tabs;
 
@@ -111,8 +116,7 @@ function Login() {
                   return Promise.reject(new Error("Please input your email!"));
                 }
 
-                if (!emailEntered.includes("@")) {
-                  // UPGRADE
+                if (!EMAIL_REQ_REGEX.test(emailEntered)) {
                   return Promise.reject(
                     new Error("Please enter a valid email!")
                   );
@@ -337,8 +341,7 @@ function Signup() {
                   return Promise.reject(new Error("Please input your email!"));
                 }
 
-                if (!emailEntered.includes("@")) {
-                  // UPGRADE
+                if (!EMAIL_REQ_REGEX.test(emailEntered)) {
                   return Promise.reject(
                     new Error("Please enter a valid email!")
                   );
@@ -365,10 +368,11 @@ function Signup() {
                   );
                 }
 
-                // UPGRADE
-                if (nameEntered.length < 3) {
+                if (nameEntered.length < MIN_USERNAME_LENGTH) {
                   return Promise.reject(
-                    new Error("Please input a valid username!")
+                    new Error(
+                      `Please input a valid username at least ${MIN_USERNAME_LENGTH} characters long!`
+                    )
                   );
                 }
 
@@ -393,8 +397,7 @@ function Signup() {
                   );
                 }
 
-                if (passEntered.length < 7) {
-                  // UPGRADE
+                if (!PASSWORD_REQ_REGEX.test(passEntered)) {
                   return Promise.reject(
                     new Error("Please input a valid password!")
                   );
