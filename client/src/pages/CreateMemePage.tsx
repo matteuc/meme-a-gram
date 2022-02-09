@@ -1,21 +1,65 @@
 import { Modal, Image, Button, Form, Input, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 import React from "react";
+import { useDispatch } from "react-redux";
+import { AppThunks } from "../store";
+import { uploadFileToStorage } from "../services";
 
 export default function CreateMemePage() {
   const navigate = useNavigate();
+
+  const [form] = Form.useForm();
 
   const [currentImageFile, setCurrentImageFile] = React.useState<File>();
 
   const [imageDataUrl, setImageDataUrl] = React.useState<any>();
 
+  const [creatingMeme, setCreatingMeme] = React.useState(false);
+
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const dispatch = useDispatch();
+
+  const createMeme = AppThunks.memes.createMeme(dispatch);
+
   const onModalCancel = () => {
     navigate("/");
   };
 
-  // TODO
-  const onSubmit: React.ComponentProps<typeof Form>["onFinish"] = (values) => {
-    console.log({ values }, { currentImageFile });
+  const onSubmit: React.ComponentProps<typeof Form>["onFinish"] = async (
+    values: any
+  ) => {
+    if (!values.title || !currentImageFile) {
+      console.debug("Title and image values not found.");
+
+      return;
+    }
+
+    setCreatingMeme(true);
+
+    try {
+      const fileKey = await uploadFileToStorage(currentImageFile);
+
+      await createMeme({
+        imageType: currentImageFile.type,
+        imageRef: fileKey,
+        title: values.title,
+      });
+    } catch (e) {
+      console.error("Error creating meme:", e);
+
+      setErrorMessage("An error occurred when creating the meme.");
+    } finally {
+      setCreatingMeme(false);
+
+      onModalCancel();
+
+      form.resetFields(["title", "image"]);
+
+      setCurrentImageFile(undefined);
+
+      setImageDataUrl(undefined);
+    }
   };
 
   const getFile = (e: any) => {
@@ -36,8 +80,6 @@ export default function CreateMemePage() {
     }
   };
 
-  const errorMessage = "Error creating meme"; // TODO
-
   const previewImageUrl =
     "https://user-images.githubusercontent.com/101482/29592647-40da86ca-875a-11e7-8bc3-941700b0a323.png";
 
@@ -49,6 +91,7 @@ export default function CreateMemePage() {
       onCancel={onModalCancel}
     >
       <Form
+        form={form}
         name='basic'
         labelCol={{ span: 4 }}
         wrapperCol={{ span: 20 }}
@@ -73,7 +116,7 @@ export default function CreateMemePage() {
             },
           ]}
         >
-          <Input />
+          <Input disabled={creatingMeme} />
         </Form.Item>
 
         <Form.Item rules={[{ required: true }]} name='image' label='Image'>
@@ -95,7 +138,7 @@ export default function CreateMemePage() {
           wrapperCol={{ offset: 20, span: 4 }}
           style={{ marginTop: "15px", alignItems: "flex-end" }}
         >
-          <Button type='primary' htmlType='submit'>
+          <Button type='primary' htmlType='submit' loading={creatingMeme}>
             Submit
           </Button>
         </Form.Item>

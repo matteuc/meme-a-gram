@@ -5,16 +5,16 @@ import { upsertUser, upsertUsers } from "../user";
 
 const queryMeme =
   (dispatch: AppDispatch) =>
-  async (...[memeId]: Parameters<
-    typeof ApiDepot.queries.getMeme
-  >): Promise<Meme> => {
+  async (
+    ...[memeId]: Parameters<typeof ApiDepot.queries.getMeme>
+  ): Promise<Meme> => {
     const getMemeResult = await ApiDepot.queries.getMeme(memeId);
 
     if (!getMemeResult) throw new Error(`No meme found with ID ${memeId}`);
 
     const meme: Meme = {
       id: getMemeResult.id,
-      createdAt: getMemeResult.createdAt,
+      createdAt: new Date(getMemeResult.createdAt).getTime(),
       title: getMemeResult.title,
       imageUrl: getMemeResult.imageUrl,
       authorId: getMemeResult.author.id,
@@ -43,7 +43,7 @@ const queryFeed =
     getFeedResult.forEach((feedResult) => {
       const meme: Meme = {
         id: feedResult.id,
-        createdAt: feedResult.createdAt,
+        createdAt: new Date(feedResult.createdAt).getTime(),
         title: feedResult.title,
         imageUrl: feedResult.imageUrl,
         authorId: feedResult.author.id,
@@ -64,7 +64,7 @@ const queryFeed =
   };
 
 const createMeme =
-  async (dispatch: AppDispatch) =>
+  (dispatch: AppDispatch) =>
   async (
     ...params: Parameters<typeof ApiDepot.mutations.createMeme>
   ): Promise<Meme> => {
@@ -72,7 +72,7 @@ const createMeme =
 
     const meme: Meme = {
       id: createMemeResult.id,
-      createdAt: createMemeResult.createdAt,
+      createdAt: new Date(createMemeResult.createdAt).getTime(),
       title: createMemeResult.title,
       authorId: createMemeResult.author.id,
       imageUrl: createMemeResult.imageUrl,

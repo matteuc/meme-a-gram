@@ -34,7 +34,7 @@ export const getFileUploadUrl = async (file: File) => {
 interface GetFeedResponse {
   feed: Array<{
     id: number;
-    createdAt: number;
+    createdAt: string;
     author: {
       id: number;
       username: string;
@@ -73,7 +73,7 @@ export const getFeed = async (lastId?: number, searchString?: string) => {
 interface GetMemeResponse {
   memeById: {
     id: number;
-    createdAt: number;
+    createdAt: string;
     author: {
       id: number;
       username: string;

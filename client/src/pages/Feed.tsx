@@ -8,6 +8,8 @@ import MemeCard from "../components/MemeCard";
 import { AppThunks } from "../store";
 import { getFeed } from "../store/meme/selectors";
 
+const MemoMemeCard = React.memo(MemeCard);
+
 export default function Feed() {
   const navigate = useNavigate();
 
@@ -24,6 +26,11 @@ export default function Feed() {
   };
 
   const MainContent = () => {
+    const sortedMemes = React.useMemo(
+      () => memes.sort((a, b) => b.createdAt - a.createdAt),
+      [memes]
+    );
+
     const noMemesAvailable = !memes.length;
     if (loadingFeed && noMemesAvailable) {
       return <p>Loading memes</p>; // Upgrade
@@ -32,9 +39,9 @@ export default function Feed() {
     } else {
       return (
         <Row>
-          {memes.map((meme) => (
-            <Col span={8}>
-              <MemeCard viewMeme={viewMemeById} meme={meme} />
+          {sortedMemes.map((meme) => (
+            <Col span={8} key={meme.id}>
+              <MemoMemeCard viewMeme={viewMemeById} meme={meme} />
             </Col>
           ))}
         </Row>

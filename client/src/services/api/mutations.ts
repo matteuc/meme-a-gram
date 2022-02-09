@@ -4,7 +4,7 @@ import { baseFetch } from "./baseFetch";
 interface CreateMemeResponse {
   createMeme: {
     id: number;
-    createdAt: number;
+    createdAt: string;
     author: {
       id: number;
       username: string;

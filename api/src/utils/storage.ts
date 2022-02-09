@@ -31,7 +31,9 @@ export const getStorageBucketUploadUrl = async (
   fileType: string,
   folderPath: string,
 ) => {
-  const objectKey = `${folderPath}/${folderId}/${fileName}`
+  const newFileName = `${(Date.now() / 1000).toFixed(0)}_${fileName}`
+
+  const objectKey = `${folderPath}/${folderId}/${newFileName}`
 
   const getPutUrl = await MAIN_STORAGE_BUCKET.api.getSignedUrlPromise(
     'putObject',
