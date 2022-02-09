@@ -11,12 +11,25 @@ import { AppThunks, RootState } from "../store";
 import { getUser } from "../store/user/selectors";
 
 const memePageStylesheet = {
+  mainMemeContent: {
+    display: "flex",
+    alignItems: "center",
+  },
+  centeredContent: {
+    height: "70vh",
+    maxHeight: "300px",
+    display: "flex",
+    justifyContent: "center",
+  },
   section: {
     margin: "10px 0",
   },
   username: {
     marginLeft: "10px",
   },
+  emptyIcon: { fontSize: 60, color: "grey" },
+  syncIcon: { fontSize: 60, color: "#1890ff" },
+  emptyContent: { alignSelf: "center" },
 };
 
 export default function MemePage() {
@@ -87,7 +100,7 @@ export default function MemePage() {
     if (meme) {
       return (
         <>
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={memePageStylesheet.mainMemeContent}>
             <p>
               <Avatar size='small'>{username[0]}</Avatar>
               <Text strong style={memePageStylesheet.username}>
@@ -127,37 +140,23 @@ export default function MemePage() {
 
     if (loadingMeme) {
       return (
-        <div
-          style={{
-            height: "70vh",
-            maxHeight: "300px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={memePageStylesheet.centeredContent}>
           <Space size='middle'>
-            <SyncOutlined style={{ fontSize: 60, color: "#1890ff" }} spin />
+            <SyncOutlined style={memePageStylesheet.syncIcon} spin />
           </Space>
         </div>
       );
     }
 
     return (
-      <div
-        style={{
-          height: "60vh",
-          maxHeight: "1000px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
+      <div style={memePageStylesheet.centeredContent}>
         <Empty
           image={
             <>
-            <MehOutlined style={{ fontSize: 60, color: "grey" }} />
+              <MehOutlined style={memePageStylesheet.emptyIcon} />
             </>
           }
-          style={{ alignSelf: "center" }}
+          style={memePageStylesheet.emptyContent}
           description={<>No meme found.</>}
         />
       </div>

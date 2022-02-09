@@ -5,6 +5,12 @@ import { useDispatch } from "react-redux";
 import { AppThunks } from "../store";
 import { uploadFileToStorage } from "../services";
 
+const stylesheet = {
+  formSection: { marginTop: "15px", alignItems: "flex-end" },
+  imagePreview: { maxHeight: 200 },
+  errorMessage: { margin: "10px 0", textAlign: "end" },
+};
+
 export default function CreateMemePage() {
   const navigate = useNavigate();
 
@@ -125,10 +131,10 @@ export default function CreateMemePage() {
 
         <Form.Item
           wrapperCol={{ offset: 4, span: 20 }}
-          style={{ marginTop: "15px", alignItems: "flex-end" }}
+          style={stylesheet.formSection}
         >
           <Image
-            style={{ maxHeight: 200 }}
+            style={stylesheet.imagePreview}
             preview={Boolean(imageDataUrl)}
             src={imageDataUrl || previewImageUrl}
           />
@@ -136,14 +142,14 @@ export default function CreateMemePage() {
 
         <Form.Item
           wrapperCol={{ offset: 20, span: 4 }}
-          style={{ marginTop: "15px", alignItems: "flex-end" }}
+          style={stylesheet.formSection}
         >
           <Button type='primary' htmlType='submit' loading={creatingMeme}>
             Submit
           </Button>
         </Form.Item>
       </Form>
-      <Typography.Paragraph style={{ margin: "10px 0", textAlign: "end" }}>
+      <Typography.Paragraph style={stylesheet.errorMessage as any}>
         <Typography.Text type='danger'>{errorMessage || ""}</Typography.Text>
       </Typography.Paragraph>
     </Modal>

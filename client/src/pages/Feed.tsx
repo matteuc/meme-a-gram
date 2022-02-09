@@ -10,6 +10,29 @@ import { getFeed } from "../store/meme/selectors";
 
 const MemoMemeCard = React.memo(MemeCard);
 
+const fabSize = "50px";
+
+const stylesheet = {
+  pageContentSpace: {
+    height: "60vh",
+    maxHeight: "1000px",
+    display: "flex",
+    justifyContent: "center",
+  },
+  emptyIcon: {
+    fontSize: 60, color: "grey"
+  },
+  syncIcon: { fontSize: 60, color: "#1890ff" },
+  emptyComp: {alignSelf: "center"},
+  fab: {
+    position: "fixed",
+    bottom: 30,
+    right: 50,
+    width: fabSize,
+    height: fabSize,
+  }
+}
+
 export default function Feed() {
   const navigate = useNavigate();
 
@@ -40,33 +63,23 @@ export default function Feed() {
     if (loadingFeed && !noMemesAvailable) {
       return (
         <div
-          style={{
-            height: "60vh",
-            maxHeight: "1000px",
-            display: "flex",
-            justifyContent: "center",
-          }}
+          style={stylesheet.pageContentSpace}
         >
           <Space size='middle'>
-            <SyncOutlined style={{ fontSize: 60, color: "#1890ff" }} spin />
+            <SyncOutlined style={stylesheet.syncIcon} spin />
           </Space>
         </div>
       );
     } else if (!loadingFeed && noMemesAvailable) {
       return (
         <div
-          style={{
-            height: "60vh",
-            maxHeight: "1000px",
-            display: "flex",
-            justifyContent: "center",
-          }}
+          style={stylesheet.pageContentSpace}
         >
           <Empty
-            style={{ alignSelf: "center" }}
+            style={stylesheet.emptyComp}
             image={
               <>
-                <MehOutlined style={{ fontSize: 60, color: "grey" }} />
+                <MehOutlined style={stylesheet.emptyIcon} />
               </>
             }
             imageStyle={{
@@ -111,7 +124,6 @@ export default function Feed() {
   }, []);
 
   const OpenCreateMemeModalButton = () => {
-    const buttonSize = "50px";
 
     const navigate = useNavigate();
 
@@ -122,13 +134,7 @@ export default function Feed() {
     return (
       <Tooltip title='Create Meme'>
         <Button
-          style={{
-            position: "fixed",
-            bottom: 30,
-            right: 50,
-            width: buttonSize,
-            height: buttonSize,
-          }}
+          style={stylesheet.fab as any}
           size='large'
           type='primary'
           shape='circle'

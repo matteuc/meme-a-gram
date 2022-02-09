@@ -14,6 +14,15 @@ import {
 
 const { TabPane } = Tabs;
 
+const stylesheet = {
+  mainModalContent: { width: "80vw", maxWidth: "700px" },
+  tabContent: { padding: "20px" },
+  submitIcon: { marginTop: "15px", alignItems: "flex-end" },
+  errorMessage: { margin: "10px 0", textAlign: "end" },
+  infoMessage: { margin: "15px 0" },
+  boldedMessage: { fontWeight: "bold" },
+};
+
 export default function LoginPage() {
   const query = useQuery();
 
@@ -41,20 +50,17 @@ export default function LoginPage() {
     <Modal
       visible={true}
       footer={null}
-      style={{
-        width: "80vw",
-        maxWidth: "700px",
-      }}
+      style={stylesheet.mainModalContent}
       onCancel={closeModal}
     >
       <Tabs defaultActiveKey={defaultView} onChange={onTabKeyChange}>
         <TabPane tab='Login' key='login'>
-          <div style={{ padding: "20px" }}>
+          <div style={stylesheet.tabContent}>
             <Login />
           </div>
         </TabPane>
         <TabPane tab='Signup' key='signup'>
-          <div style={{ padding: "20px" }}>
+          <div style={stylesheet.tabContent}>
             <Signup />
           </div>
         </TabPane>
@@ -153,14 +159,14 @@ function Login() {
 
         <Form.Item
           wrapperCol={{ offset: 20, span: 4 }}
-          style={{ marginTop: "15px", alignItems: "flex-end" }}
+          style={stylesheet.submitIcon}
         >
           <Button type='primary' htmlType='submit' loading={loggingIn}>
             Submit
           </Button>
         </Form.Item>
       </Form>
-      <Paragraph style={{ margin: "10px 0", textAlign: "end" }}>
+      <Paragraph style={stylesheet.errorMessage as any}>
         <Text type='danger'>{errorMessage || ""}</Text>
       </Paragraph>
     </>
@@ -267,9 +273,9 @@ function Signup() {
     if (showCodeConfirmation) {
       return (
         <>
-          <Paragraph style={{ margin: "15px 0" }}>
+          <Paragraph style={stylesheet.infoMessage}>
             Please enter the confirmation code sent to{" "}
-            <span style={{ fontWeight: "bold" }}>
+            <span style={stylesheet.boldedMessage}>
               {infoForm.getFieldValue("email")}
             </span>
           </Paragraph>
@@ -303,7 +309,7 @@ function Signup() {
             </Form.Item>
             <Form.Item
               wrapperCol={{ offset: 20, span: 4 }}
-              style={{ marginTop: "15px", alignItems: "flex-end" }}
+              style={stylesheet.submitIcon}
             >
               <Button
                 type='primary'
@@ -314,7 +320,7 @@ function Signup() {
               </Button>
             </Form.Item>
           </Form>
-          <Paragraph style={{ margin: "10px 0", textAlign: "end" }}>
+          <Paragraph style={stylesheet.errorMessage as any}>
             <Text type='danger'>{errorMessage || ""}</Text>
           </Paragraph>
         </>
@@ -433,7 +439,7 @@ function Signup() {
 
         <Form.Item
           wrapperCol={{ offset: 20, span: 4 }}
-          style={{ marginTop: "15px", alignItems: "flex-end" }}
+          style={stylesheet.submitIcon}
         >
           <Button
             type='primary'
