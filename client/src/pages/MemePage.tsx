@@ -1,5 +1,5 @@
-import { Avatar, Button, Image, message, Modal } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { Avatar, Button, Empty, Image, message, Modal, Space } from "antd";
+import { DownloadOutlined, SyncOutlined, MehOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import React from "react";
 import Text from "antd/lib/typography/Text";
@@ -44,7 +44,10 @@ export default function MemePage() {
     getMemeById(thisMemeId)
       .catch((e) => {
         console.debug("Error fetching meme by ID", e);
-        message.error({content: 'A problem occurred when fetching this meme.', duration: 5})
+        message.error({
+          content: "A problem occurred when fetching this meme.",
+          duration: 5,
+        });
       })
       .finally(() => {
         setLoadingMeme(false);
@@ -123,10 +126,42 @@ export default function MemePage() {
     }
 
     if (loadingMeme) {
-      return <p>Loading</p>; // UPGRADE
+      return (
+        <div
+          style={{
+            height: "70vh",
+            maxHeight: "300px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Space size='middle'>
+            <SyncOutlined style={{ fontSize: 60, color: "#1890ff" }} spin />
+          </Space>
+        </div>
+      );
     }
 
-    return <p>No meme found!</p>; // UPGRADE
+    return (
+      <div
+        style={{
+          height: "60vh",
+          maxHeight: "1000px",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Empty
+          image={
+            <>
+            <MehOutlined style={{ fontSize: 60, color: "grey" }} />
+            </>
+          }
+          style={{ alignSelf: "center" }}
+          description={<>No meme found.</>}
+        />
+      </div>
+    );
   };
 
   return (

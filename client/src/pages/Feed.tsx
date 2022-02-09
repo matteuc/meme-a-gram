@@ -2,16 +2,13 @@ import { Button, Col, Empty, message, Row, Space, Spin, Tooltip } from "antd";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
-import { PlusOutlined, SyncOutlined } from "@ant-design/icons";
+import { PlusOutlined, SyncOutlined, MehOutlined } from "@ant-design/icons";
 
 import MemeCard from "../components/MemeCard";
 import { AppThunks } from "../store";
 import { getFeed } from "../store/meme/selectors";
 
 const MemoMemeCard = React.memo(MemeCard);
-
-const defaultEmptyImage =
-  "https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -67,7 +64,11 @@ export default function Feed() {
         >
           <Empty
             style={{ alignSelf: "center" }}
-            image={defaultEmptyImage}
+            image={
+              <>
+                <MehOutlined style={{ fontSize: 60, color: "grey" }} />
+              </>
+            }
             imageStyle={{
               height: 150,
             }}
