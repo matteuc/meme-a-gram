@@ -104,6 +104,7 @@ function Login() {
   return (
     <>
       <Form
+        data-testid='login-form'
         form={form}
         name='basic'
         labelCol={{ span: 6 }}
@@ -329,6 +330,7 @@ function Signup() {
 
     return (
       <Form
+        data-testid='signup-form'
         form={infoForm}
         name='basic'
         labelCol={{ span: 6 }}

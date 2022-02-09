@@ -22,6 +22,10 @@ const createUser =
 const getCurrentUser = (dispatch: AppDispatch) => async (): Promise<User> => {
   const currUser = await ApiDepot.queries.getCurrentUser();
 
+  if (!currUser) {
+    throw new Error("No user returned from get user request.");
+  }
+
   const user: User = {
     id: currUser.id,
     username: currUser.username,

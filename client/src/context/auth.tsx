@@ -52,7 +52,7 @@ const AuthProvider: React.FC = ({ children }) => {
     const confirmRegistration = async (code: string, username: string) => {
       await authService.confirmAccountUsingCode(cogUser, code);
 
-      await authService.loginUsingCredentials(...params)
+      await authService.loginUsingCredentials(...params);
 
       const newUser = await createUser({ username });
 

@@ -97,6 +97,7 @@ export default function CreateMemePage() {
       onCancel={onModalCancel}
     >
       <Form
+        data-testid='create-meme-form'
         form={form}
         name='basic'
         labelCol={{ span: 4 }}

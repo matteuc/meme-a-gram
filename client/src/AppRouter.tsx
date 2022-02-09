@@ -65,6 +65,7 @@ function NavBar() {
   const LoginButton = React.useCallback(
     () => (
       <Button
+        data-testid='login-nav-button'
         size='large'
         type='text'
         shape='circle'

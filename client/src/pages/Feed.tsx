@@ -20,18 +20,19 @@ const stylesheet = {
     justifyContent: "center",
   },
   emptyIcon: {
-    fontSize: 60, color: "grey"
+    fontSize: 60,
+    color: "grey",
   },
   syncIcon: { fontSize: 60, color: "#1890ff" },
-  emptyComp: {alignSelf: "center"},
+  emptyComp: { alignSelf: "center" },
   fab: {
     position: "fixed",
     bottom: 30,
     right: 50,
     width: fabSize,
     height: fabSize,
-  }
-}
+  },
+};
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -62,9 +63,7 @@ export default function Feed() {
 
     if (loadingFeed && !noMemesAvailable) {
       return (
-        <div
-          style={stylesheet.pageContentSpace}
-        >
+        <div style={stylesheet.pageContentSpace}>
           <Space size='middle'>
             <SyncOutlined style={stylesheet.syncIcon} spin />
           </Space>
@@ -72,9 +71,7 @@ export default function Feed() {
       );
     } else if (!loadingFeed && noMemesAvailable) {
       return (
-        <div
-          style={stylesheet.pageContentSpace}
-        >
+        <div style={stylesheet.pageContentSpace} >
           <Empty
             style={stylesheet.emptyComp}
             image={
@@ -124,7 +121,6 @@ export default function Feed() {
   }, []);
 
   const OpenCreateMemeModalButton = () => {
-
     const navigate = useNavigate();
 
     const openModal = () => {
@@ -134,6 +130,7 @@ export default function Feed() {
     return (
       <Tooltip title='Create Meme'>
         <Button
+          data-testid='create-meme-fab'
           style={stylesheet.fab as any}
           size='large'
           type='primary'
@@ -146,7 +143,7 @@ export default function Feed() {
   };
 
   return (
-    <div>
+    <div data-testid="feed-content">
       <MainContent />
       <OpenCreateMemeModalButton />
       <Outlet />
