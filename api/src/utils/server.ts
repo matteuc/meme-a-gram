@@ -1,15 +1,14 @@
-import {
+import mercurius, {
   MercuriusContext,
   onResolutionHookHandler,
   preParsingHookHandler,
 } from 'mercurius'
-import {
-  ApplyPolicyHandler,
-  AuthContextHandler,
-} from 'mercurius-auth'
+import { ApplyPolicyHandler, AuthContextHandler } from 'mercurius-auth'
 import crypto from 'crypto'
 import { context as appContext } from '../context'
 import { getUserFromToken } from '../utils'
+
+const { ErrorWithProps } = mercurius
 
 export const preParsingHook: preParsingHookHandler<MercuriusContext> = async (
   _schema,
@@ -31,10 +30,9 @@ ${stdoutLine}
 `)
 }
 
-export const onResolutionHook: onResolutionHookHandler<MercuriusContext> = async (
-  execution,
-  context,
-) => {
+export const onResolutionHook: onResolutionHookHandler<
+  MercuriusContext
+> = async (execution, context) => {
   const stdoutLine = '-'.repeat(process.stdout.columns)
 
   // @ts-ignore
@@ -62,8 +60,10 @@ export const authContextHandler: AuthContextHandler<MercuriusContext> = async (
 ) => {
   const authToken =
     context.reply.request.headers['Authorization'] ||
-    context.reply.request.headers['authorization'] ||
-    ''
+    context.reply.request.headers['authorization']
+
+  if (!authToken) return
+
   try {
     const authContext = await getUserFromToken(
       Array.isArray(authToken) ? authToken[0] : authToken,
@@ -87,7 +87,11 @@ export const applyPolicyHandler: ApplyPolicyHandler<MercuriusContext> = async (
   const isAuth = Boolean(context.auth?.user)
 
   if (needsAuth && !isAuth) {
-    return new Error(`User not authenticated to access ${info.fieldName}`)
+    return new ErrorWithProps(
+      `User not authenticated to access ${info.fieldName}`,
+      {},
+      401,
+    )
   }
 
   return true

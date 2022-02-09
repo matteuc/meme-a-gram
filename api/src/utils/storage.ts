@@ -3,7 +3,6 @@ import { MAIN_STORAGE_BUCKET } from '../services'
 // Get image URL based off image reference
 export const getImageUrlFromImageRef = async (
   imageRef: string,
-  fileType: string,
 ): Promise<string | null> => {
   if (!MAIN_STORAGE_BUCKET.name || !MAIN_STORAGE_BUCKET.region) {
     throw new Error('No main storage bucket name or region provided.')

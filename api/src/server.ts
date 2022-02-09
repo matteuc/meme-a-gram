@@ -11,7 +11,7 @@ import {
 } from './utils'
 import { AUTH_OBJECT_POLICY, DEPLOYED_TO_PORT } from './constants'
 
-const buildServer = async () => {
+export const buildServer = async () => {
   const app = fastify()
 
   await app

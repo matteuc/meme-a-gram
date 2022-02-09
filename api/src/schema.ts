@@ -116,10 +116,14 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       const userId = context.auth?.user?.id
 
       if (!userId) {
-        throw new ErrorWithProps(ERROR_CODES.NOT_AUTH.message, {
-          code: ERROR_CODES.NOT_AUTH.code,
-          timestamp: new Date().getTime(),
-        })
+        throw new ErrorWithProps(
+          ERROR_CODES.NOT_AUTH.message,
+          {
+            code: ERROR_CODES.NOT_AUTH.code,
+            timestamp: new Date().getTime(),
+          },
+          ERROR_CODES.NOT_AUTH.statusCode,
+        )
       }
 
       const putUrl = await getStorageBucketUploadUrl(
@@ -134,22 +138,22 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         key: putUrl.key,
       }
     },
-    getCurrentUser: async (
-      _,
-      _args,
-      context: CustomContext,
-    ) => {
+    getCurrentUser: async (_, _args, context: CustomContext) => {
       const currUser = context.auth?.user
 
       if (!currUser) {
-        throw new ErrorWithProps(ERROR_CODES.NOT_AUTH.message, {
-          code: ERROR_CODES.NOT_AUTH.code,
-          timestamp: new Date().getTime(),
-        })
+        throw new ErrorWithProps(
+          ERROR_CODES.NOT_AUTH.message,
+          {
+            code: ERROR_CODES.NOT_AUTH.code,
+            timestamp: new Date().getTime(),
+          },
+          ERROR_CODES.NOT_AUTH.statusCode,
+        )
       }
 
       return currUser
-    } 
+    },
   },
   Mutation: {
     signupUser: async (
@@ -157,13 +161,24 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       args: { data: UserCreateInput },
       context: CustomContext,
     ) => {
-      
-      if(context.auth?.user) {
-        throw new Error('This user already has an account.')
+      if (context.auth?.user) {
+        throw new ErrorWithProps(
+          'This user already has an account.',
+          {
+            timestamp: new Date().getTime(),
+          },
+          400,
+        )
       }
 
-      if(!context.auth?.userEmail) {
-        throw new Error('This user\'s authentication information was not found.')
+      if (!context.auth?.userEmail) {
+        throw new ErrorWithProps(
+          "This user's authentication information was not found.",
+          {
+            timestamp: new Date().getTime(),
+          },
+          400,
+        )
       }
 
       return context.prisma.user.create({
@@ -179,13 +194,17 @@ const resolvers: IExecutableSchemaDefinition['resolvers'] = {
       context: CustomContext,
     ) => {
       if (!context.auth?.user?.email) {
-        throw new Error('User "email" not found when creating a meme.')
+        throw new ErrorWithProps(
+          ERROR_CODES.NOT_AUTH.message,
+          {
+            code: ERROR_CODES.NOT_AUTH.code,
+            timestamp: new Date().getTime(),
+          },
+          ERROR_CODES.NOT_AUTH.statusCode,
+        )
       }
 
-      const permUrl = await getImageUrlFromImageRef(
-        args.data.imageRef,
-        args.data.imageType,
-      )
+      const permUrl = await getImageUrlFromImageRef(args.data.imageRef)
 
       if (!permUrl) {
         throw new ErrorWithProps(ERROR_CODES.MEME_REF_INVALID.message, {

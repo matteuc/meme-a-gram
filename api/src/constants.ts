@@ -7,10 +7,12 @@ export const ERROR_CODES = {
   MEME_REF_INVALID: {
     message: 'Invalid Meme imageRef.',
     code: 'MEME_REF_INVALID',
+    statusCode: 400
   },
   NOT_AUTH: {
     message: 'User not authenticated.',
     code: 'NOT_AUTH',
+    statusCode: 401
   },
 }
 
