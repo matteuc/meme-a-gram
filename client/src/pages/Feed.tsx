@@ -53,13 +53,15 @@ export default function Feed() {
     navigate("/create");
   };
 
-  const MainContent = () => {
-    const sortedMemes = React.useMemo(
-      () => memes.sort((a, b) => b.createdAt - a.createdAt),
-      [memes]
-    );
+  const sortedMemes = React.useMemo(
+    () => memes.sort((a, b) => b.createdAt - a.createdAt),
+    [memes]
+  );
 
-    const noMemesAvailable = !memes.length;
+  const MainContent = () => {
+    const imageRowHeight = 250;
+
+    const noMemesAvailable = !sortedMemes.length;
 
     if (loadingFeed && !noMemesAvailable) {
       return (
@@ -71,7 +73,7 @@ export default function Feed() {
       );
     } else if (!loadingFeed && noMemesAvailable) {
       return (
-        <div style={stylesheet.pageContentSpace} >
+        <div style={stylesheet.pageContentSpace}>
           <Empty
             style={stylesheet.emptyComp}
             image={
@@ -94,8 +96,12 @@ export default function Feed() {
       return (
         <Row>
           {sortedMemes.map((meme) => (
-            <Col span={8} key={meme.id}>
-              <MemoMemeCard viewMeme={viewMemeById} meme={meme} />
+            <Col xs={12} sm={8} lg={6}>
+              <MemoMemeCard
+                viewMeme={viewMemeById}
+                meme={meme}
+                height={imageRowHeight}
+              />
             </Col>
           ))}
         </Row>
@@ -143,7 +149,7 @@ export default function Feed() {
   };
 
   return (
-    <div data-testid="feed-content">
+    <div data-testid='feed-content'>
       <MainContent />
       <OpenCreateMemeModalButton />
       <Outlet />
